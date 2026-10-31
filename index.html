@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daylight">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Daylight</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191b23;--panel2:#20232d;--line:#2c303b;--text:#f1f0ed;--muted:#9b9eaa;--accent:#c5b69e;--accent2:#8f806b;--good:#9bb7a2;--danger:#d28f8f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:760px;margin:auto;padding:calc(20px + env(safe-area-inset-top)) 18px 24px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.brand{font-size:13px;letter-spacing:.2em;color:var(--accent);font-weight:700}.date{color:var(--muted);font-size:13px;margin-top:5px}
+h1{font-size:32px;letter-spacing:-.04em;margin:6px 0 0;font-weight:650}h2{font-size:21px;margin:0 0 14px;letter-spacing:-.02em}
+h3{font-size:15px;margin:0;font-weight:600}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:17px;margin:12px 0}
+.hero{background:linear-gradient(145deg,#242630,#181a21);padding:21px}
+.hero p{color:var(--muted);margin:8px 0 0;font-size:14px}
+.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+.pill{border:1px solid var(--line);border-radius:99px;padding:7px 11px;color:var(--muted);font-size:12px}
+.progress{height:6px;background:#30333d;border-radius:9px;overflow:hidden;margin-top:12px}.progress span{display:block;height:100%;background:var(--accent);border-radius:9px}
+.task{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}
+.check{width:23px;height:23px;border:1.5px solid #777b87;border-radius:50%;background:transparent;color:#15171c;flex:none}.check.done{background:var(--good);border-color:var(--good)}
+.task.done .taskname{text-decoration:line-through;color:var(--muted)}
+.time{font-size:12px;color:var(--accent);width:49px;flex:none}.taskname{font-size:14px}
+.iconbtn{border:0;background:transparent;color:var(--muted);font-size:20px;padding:4px 7px}
+.primary{background:var(--accent);color:#17171a;border:0;border-radius:13px;padding:12px 16px;font-weight:650}
+.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+input,textarea{background:#111319;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;outline:none}
+input:focus,textarea:focus{border-color:var(--accent2)}textarea{min-height:150px;resize:vertical}
+.form{display:flex;gap:8px;margin-top:12px}.form input{min-width:0}.form .timeinput{max-width:112px}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(20,21,27,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:9px 8px calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:5}
+.tabbar{width:min(760px,100%);display:flex;justify-content:space-around}.tab{border:0;background:none;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:58px;padding:3px}.tab b{font-size:20px;font-weight:400}.tab.active{color:var(--accent)}
+.view{display:none}.view.active{display:block}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin:23px 0 8px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 8px}
+.listitem{padding:13px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border:0}
+.goalbar{height:8px;background:#30333d;border-radius:9px;margin:10px 0}.goalbar span{display:block;height:100%;background:var(--good);border-radius:9px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}.day{padding:9px 0;border-radius:12px;color:var(--muted);font-size:12px}.day.selected{background:var(--accent);color:#17171a}.day.today:not(.selected){border:1px solid var(--accent2)}
+.monthnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+@media(min-width:600px){.app{padding-top:35px}.card{padding:20px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="brand">DAYLIGHT</div><div class="date" id="topdate"></div></div><div class="pill" id="clock"></div></header>
+<section id="today" class="view active">
+ <div class="card hero"><div class="small">DEIN TAG, IN DEINEM TEMPO</div><h1 id="greeting">Schön, dass du da bist.</h1><p>Ein Schritt nach dem anderen reicht.</p><div class="row between" style="margin-top:19px"><span class="small" id="tasksummary">Noch keine Aufgaben</span><span class="small" id="percent">0 %</span></div><div class="progress"><span id="dayprogress" style="width:0%"></span></div></div>
+ <div class="sectionhead"><h2>Tagesplan</h2><span class="small" id="selecteddate"></span></div>
+ <div class="card" id="tasklist"></div>
+ <div class="form"><input id="taskname" placeholder="Neue Aufgabe …" aria-label="Neue Aufgabe"><input class="timeinput" id="tasktime" type="time" aria-label="Uhrzeit"><button class="primary" id="addtask">+</button></div>
+ <div class="sectionhead"><h2>Heute gut für mich</h2><span class="small">ohne Druck</span></div>
+ <div class="card"><div class="row between"><div><h3>Ein kleiner Check-in</h3><div class="small" style="margin-top:5px">Wie geht es dir gerade?</div></div><span style="font-size:22px">✦</span></div><div class="row" style="margin-top:13px;flex-wrap:wrap" id="moods"><button class="secondary">🙂 Gut</button><button class="secondary">😐 Okay</button><button class="secondary">😮‍💨 Anstrengend</button></div><div class="small" id="moodresult" style="margin-top:9px"></div></div>
+</section>
+<section id="routines" class="view">
+ <div class="sectionhead"><h2>Routinen</h2><span class="pill">Dein Rhythmus</span></div>
+ <div class="card"><div class="row between"><h3>☀️ Morgenroutine</h3><span class="small" id="morningcount"></span></div><div id="morninglist"></div><div class="form"><input id="morningnew" placeholder="Schritt hinzufügen …"><button class="primary" onclick="addRoutine('morning')">+</button></div></div>
+ <div class="card"><div class="row between"><h3>☾ Abendroutine</h3><span class="small" id="eveningcount"></span></div><div id="eveninglist"></div><div class="form"><input id="eveningnew" placeholder="Schritt hinzufügen …"><button class="primary" onclick="addRoutine('evening')">+</button></div></div>
+ <p class="small">Routinen sind Vorschläge, keine Pflicht. Du kannst sie jederzeit anpassen.</p>
+</section>
+<section id="calendar" class="view">
+ <div class="sectionhead"><h2>Kalender</h2></div>
+ <div class="card"><div class="monthnav"><button class="iconbtn" id="prevmonth">‹</button><h3 id="monthlabel"></h3><button class="iconbtn" id="nextmonth">›</button></div><div class="days" id="calendargrid"></div></div>
+ <div class="sectionhead"><h2 id="caldaytitle">Dein Tag</h2></div><div class="card" id="caldaytasks"></div>
+</section>
+<section id="goals" class="view">
+ <div class="sectionhead"><h2>Ziele & Gewohnheiten</h2></div>
+ <div class="card"><h3>Persönliche Ziele</h3><div id="goallist"></div><div class="form"><input id="goalname" placeholder="Ein Ziel, das dir wichtig ist …"><button class="primary" id="addgoal">+</button></div></div>
+ <div class="card"><h3>Gewohnheiten</h3><p class="small">Markiere, was du heute gemacht hast. Es gibt keine perfekte Serie zu erreichen.</p><div id="habitlist"></div><div class="form"><input id="habitname" placeholder="Gewohnheit hinzufügen …"><button class="primary" id="addhabit">+</button></div></div>
+</section>
+<section id="notes" class="view">
+ <div class="sectionhead"><h2>Notizen & Gedanken</h2><span class="pill" id="savedlabel">Lokal gespeichert</span></div>
+ <div class="card"><h3>Dein persönlicher Platz</h3><p class="small">Schreib auf, was dir durch den Kopf geht.</p><textarea id="notesarea" placeholder="Was möchtest du festhalten?"></textarea><div class="row between" style="margin-top:10px"><span class="small">Bleibt auf diesem Gerät gespeichert.</span><button class="secondary" id="clearnotes">Leeren</button></div></div>
+ <div class="card"><h3>Datenschutz</h3><p class="small">Daylight speichert deine Einträge lokal in diesem Browser auf deinem iPhone. Es wird kein Konto benötigt. Wenn du Website-Daten löschst oder Safari zurücksetzt, können die Einträge verloren gehen.</p></div>
+</section>
+</div>
+<nav class="tabs"><div class="tabbar">
+<button class="tab active" data-view="today"><b>⌂</b>Heute</button><button class="tab" data-view="routines"><b>↻</b>Routinen</button><button class="tab" data-view="calendar"><b>▦</b>Kalender</button><button class="tab" data-view="goals"><b>◇</b>Ziele</button><button class="tab" data-view="notes"><b>✎</b>Notizen</button>
+</div></nav>
+<script>
+const $=id=>document.getElementById(id);
+const key='daylight-v1';
+const todayISO=()=>{let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+let data;try{data=JSON.parse(localStorage.getItem(key))||{tasks:{},routines:{morning:['In Ruhe aufstehen','Ein Glas Wasser trinken','Fertig machen'],evening:['Dinge für morgen vorbereiten','Bildschirmzeit reduzieren','Zur Ruhe kommen']},goals:[],habits:[],habitChecks:{},notes:''}}catch(e){data={tasks:{},routines:{morning:[],evening:[]},goals:[],habits:[],habitChecks:{},notes:''}}
+let selected=todayISO(),month=new Date();
+function save(){localStorage.setItem(key,JSON.stringify(data))}
+function tasks(){return data.tasks[selected]||(data.tasks[selected]=[])}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderTasks(target='tasklist',date=selected){let arr=data.tasks[date]||[];$(target).innerHTML=arr.length?arr.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map((t,i)=>`<div class="task ${t.done?'done':''}"><button class="check ${t.done?'done':''}" data-task="${i}" aria-label="Erledigt">${t.done?'✓':''}</button><span class="time">${t.time||'— —'}</span><span class="taskname grow">${esc(t.name)}</span><button class="iconbtn" data-delete="${i}" aria-label="Löschen">×</button></div>`).join(''):'<div class="empty">Noch nichts geplant. Du kannst klein anfangen.</div>';
+$(target).querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{let t=arr[+b.dataset.task];t.done=!t.done;save();renderAll()});
+$(target).querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{arr.splice(+b.dataset.delete,1);save();renderAll()});
+}
+function addTask(){let n=$('taskname').value.trim();if(!n)return;tasks().push({name:n,time:$('tasktime').value,done:false});$('taskname').value='';$('tasktime').value='';save();renderAll()}
+$('addtask').onclick=addTask;$('taskname').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+function renderRoutines(){['morning','evening'].forEach(type=>{let arr=data.routines[type]||[];$(type+'list').innerHTML=arr.length?arr.map((x,i)=>`<div class="task"><button class="check ${x.done?'done':''}" data-r="${type}" data-i="${i}">${x.done?'✓':''}</button><span class="taskname grow">${esc(x.name||x)}</span><button class="iconbtn" data-rdel="${type}" data-i="${i}">×</button></div>`).join(''):'<div class="empty">Noch keine Schritte.</div>';$(type+'count').textContent=arr.filter(x=>x.done).length+'/'+arr.length+' erledigt'});document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{let x=data.routines[b.dataset.r][+b.dataset.i];if(typeof x==='string')data.routines[b.dataset.r][+b.dataset.i]={name:x,done:true};else x.done=!x.done;save();renderRoutines()});document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{data.routines[b.dataset.r].splice(+b.dataset.i,1);save();renderRoutines()})}
+function addRoutine(type){let input=$(type+'new'),v=input.value.trim();if(!v)return;data.routines[type].push({name:v,done:false});input.value='';save();renderRoutines()}
+function renderCalendar(){let y=month.getFullYear(),m=month.getMonth();$('monthlabel').textContent=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(month);let first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let out=['Mo','Di','Mi','Do','Fr','Sa','So'].map(x=>`<div class="small">${x}</div>`).join('');for(let i=0;i<offset;i++)out+='<div></div>';for(let d=1;d<=days;d++){let iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;out+=`<button class="day ${iso===selected?'selected':''} ${iso===todayISO()?'today':''}" data-date="${iso}">${d}</button>`}$('calendargrid').innerHTML=out;document.querySelectorAll('[data-date]').forEach(b=>b.onclick=()=>{selected=b.dataset.date;renderCalendar();$('caldaytitle').textContent=new Date(selected+'T12:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'long'});renderTasks('caldaytasks',selected) });$('caldaytitle').textContent=new Date(selected+'T12:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'long'});renderTasks('caldaytasks',selected)}
+$('prevmonth').onclick=()=>{month.setMonth(month.getMonth()-1);renderCalendar()};$('nextmonth').onclick=()=>{month.setMonth(month.getMonth()+1);renderCalendar()};
+function renderGoals(){ $('goallist').innerHTML=data.goals.length?data.goals.map((g,i)=>`<div class="listitem"><div class="row between"><span>${esc(g.name)}</span><span class="small">${g.progress||0}%</span></div><div class="goalbar"><span style="width:${g.progress||0}%"></span></div><div class="row"><button class="secondary" data-gminus="${i}">−</button><button class="secondary" data-gplus="${i}">+10 %</button><button class="iconbtn" data-gdel="${i}">×</button></div></div>`).join(''):'<div class="empty">Du kannst ein Ziel hinzufügen, das dir wirklich wichtig ist.</div>';document.querySelectorAll('[data-gplus]').forEach(b=>b.onclick=()=>{let g=data.goals[+b.dataset.gplus];g.progress=Math.min(100,(g.progress||0)+10);save();renderGoals()});document.querySelectorAll('[data-gminus]').forEach(b=>b.onclick=()=>{let g=data.goals[+b.dataset.gminus];g.progress=Math.max(0,(g.progress||0)-10);save();renderGoals()});document.querySelectorAll('[data-gdel]').forEach(b=>b.onclick=()=>{data.goals.splice(+b.dataset.gdel,1);save();renderGoals()});
+$('habitlist').innerHTML=data.habits.length?data.habits.map((h,i)=>`<div class="task"><button class="check ${data.habitChecks[todayISO()]?.[i]?'done':''}" data-habit="${i}">${data.habitChecks[todayISO()]?.[i]?'✓':''}</button><span class="taskname grow">${esc(h)}</span><button class="iconbtn" data-hdel="${i}">×</button></div>`).join(''):'<div class="empty">Füge eine Gewohnheit hinzu, wenn du möchtest.</div>';document.querySelectorAll('[data-habit]').forEach(b=>b.onclick=()=>{let i=+b.dataset.habit;data.habitChecks[todayISO()]??={};data.habitChecks[todayISO()][i]=!data.habitChecks[todayISO()][i];save();renderGoals()});document.querySelectorAll('[data-hdel]').forEach(b=>b.onclick=()=>{data.habits.splice(+b.dataset.hdel,1);save();renderGoals()})}
+$('addgoal').onclick=()=>{let v=$('goalname').value.trim();if(v){data.goals.push({name:v,progress:0});$('goalname').value='';save();renderGoals()}};$('addhabit').onclick=()=>{let v=$('habitname').value.trim();if(v){data.habits.push(v);$('habitname').value='';save();renderGoals()}};
+$('notesarea').value=data.notes||'';$('notesarea').oninput=()=>{data.notes=$('notesarea').value;save();$('savedlabel').textContent='Gespeichert ✓'};$('clearnotes').onclick=()=>{if(confirm('Notizen wirklich leeren?')){$('notesarea').value='';data.notes='';save()}};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.view).classList.add('active');if(b.dataset.view==='calendar')renderCalendar()});
+$('moods').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('moodresult').textContent='Check-in: '+b.textContent+' · Danke, dass du kurz bei dir eingecheckt hast.'});
+function renderAll(){let a=tasks(),done=a.filter(x=>x.done).length,p=a.length?Math.round(done/a.length*100):0;$('tasksummary').textContent=a.length?`${done} von ${a.length} Aufgaben erledigt`:'Noch keine Aufgaben geplant';$('percent').textContent=p+' %';$('dayprogress').style.width=p+'%';$('selecteddate').textContent=new Date(selected+'T12:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'});renderTasks();renderRoutines();renderGoals();renderCalendar()}
+function tick(){let d=new Date();$('clock').textContent=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});$('topdate').textContent=d.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});$('greeting').textContent=d.getHours()<11?'Guten Morgen.':d.getHours()<18?'Schön, dass du da bist.':'Guten Abend.'}
+tick();setInterval(tick,30000);renderAll();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
